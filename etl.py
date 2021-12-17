@@ -21,10 +21,11 @@ def create_spark_session():
     return spark
 
 
+ 
 
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
-    song_data =  "s3a://udacity-dend/song_data/A/B/C/*.json"
+    song_data =  "s3a://udacity-dend/song_data/A/B/B/*.json"
     
     # read song data file
     song_data_df = spark.read.json(song_data)
@@ -41,7 +42,7 @@ def process_song_data(spark, input_data, output_data):
     artists_table = song_data_df.select['artist_id', 'artist_name', 
                             'artist_location','artist_latitude',
                             'artist_longitude']
-    artist_table.withColumnRenamed('artist_name', 'name') \
+    artists_table.withColumnRenamed('artist_name', 'name') \
                 .withColumnRenamed('artist_location', 'location') \
                 .withColumnRenamed('artist_latitude', 'latitude') \
                 .withColumnRenamed('artist_longitude', 'longitude')
@@ -53,7 +54,7 @@ def process_song_data(spark, input_data, output_data):
 
 def process_log_data(spark, input_data, output_data):
     # get filepath to log data file
-    log_data = input_data + 'log_data/*.json'
+    log_data = input_data + 'log_data/*/*/*.json'
 
     # read log data file
     log_data_df = spark.read.json(log_data)
@@ -63,7 +64,7 @@ def process_log_data(spark, input_data, output_data):
 
     # extract columns for users table    
     users_table = log_data_df.select('userId', 'firstName', 'lastName',\
-                            'gender', 'level').dropDuplicates()
+                            'gender', 'level')
     
     # write users table to parquet files
     users_table.write.parquet(os.path.join(output_data, 'users/users.parquet'), 'overwrite')
@@ -85,7 +86,7 @@ def process_log_data(spark, input_data, output_data):
                        .withColumn('month', month('datetime')) \
                        .withColumn('year', year('datetime')) \
                        .withColumn('weekday', dayofweek('datetime')) \
-                       .dropDuplicates()
+                       
     
     # write time table to parquet files partitioned by year and month
     time_table.write.partitionBy('year', 'month') \
